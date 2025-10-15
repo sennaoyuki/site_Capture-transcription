@@ -1,0 +1,10 @@
+backend/
+search_man copy/
+search_man/
+TD作成くん/
+サイトテキスト起こせるくん/
+マウスピース矯正/
+生成AI/
+*.pyc
+__pycache__/
+.git/
