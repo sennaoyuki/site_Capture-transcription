@@ -101,7 +101,7 @@ async def transcribe_url(request: TranscribeURLRequest):
 
     # バックグラウンドで処理を実行（ThreadPoolExecutorで同期関数を実行）
     loop = asyncio.get_event_loop()
-    loop.run_in_executor(executor, process_url_transcription, job_id, str(request.url))
+    asyncio.ensure_future(loop.run_in_executor(executor, process_url_transcription, job_id, str(request.url)))
 
     return {
         "job_id": job_id,
@@ -135,7 +135,7 @@ async def transcribe_upload(file: UploadFile = File(...)):
 
     # バックグラウンドで処理を実行（ThreadPoolExecutorで同期関数を実行）
     loop = asyncio.get_event_loop()
-    loop.run_in_executor(executor, process_local_transcription, job_id, temp_file_path)
+    asyncio.ensure_future(loop.run_in_executor(executor, process_local_transcription, job_id, temp_file_path))
 
     return {
         "job_id": job_id,
