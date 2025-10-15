@@ -46,7 +46,7 @@ cp .env.example .env
 
 3. Backend起動
 ```bash
-cd backend
+cd api
 pip install -r requirements.txt
 playwright install chromium
 python app.py
@@ -54,12 +54,11 @@ python app.py
 
 4. Frontend起動（別ターミナル）
 ```bash
-cd frontend
 npm install
 npm run dev
 ```
 
-5. ブラウザで http://localhost:3001 にアクセス
+5. ブラウザで http://localhost:3000 にアクセス
 
 ## Vercelへのデプロイ
 
@@ -109,16 +108,33 @@ vercel --prod
 
 2. **Vercelでフロントエンドのみデプロイ**し、`API_BASE_URL`環境変数でバックエンドURLを指定
 
-## バックエンドのデプロイ（Railway例）
+## バックエンドのデプロイ（Railway）
+
+### 自動デプロイ（推奨）
+
+リポジトリに`railway.json`が含まれているため、自動的に設定されます：
 
 1. [Railway](https://railway.app)にログイン
 2. 「New Project」→「Deploy from GitHub repo」
-3. リポジトリを選択
-4. Root Directory: `backend`
-5. Start Command: `python app.py`
-6. 環境変数を設定:
-   - `GOOGLE_API_KEY`
-7. デプロイ完了後、URLをコピーしてVercelの`API_BASE_URL`に設定
+3. リポジトリ選択: `sennaoyuki/site_Capture-transcription`
+4. Railwayが自動で`railway.json`を検出してデプロイ
+5. 環境変数を設定:
+   - `GOOGLE_API_KEY`: Google Gemini API Key
+   - `PORT`: 8000（自動設定される場合あり）
+6. デプロイ完了後、URLをコピー（例: `https://your-app.railway.app`）
+7. Vercel Dashboardで`API_BASE_URL`環境変数を設定:
+   - `https://your-app.railway.app`
+8. Vercelで再デプロイ
+
+### 手動設定が必要な場合
+
+`railway.json`が認識されない場合：
+
+1. Settings → Build:
+   - Build Command: `pip install -r api/requirements.txt && playwright install chromium && playwright install-deps`
+2. Settings → Deploy:
+   - Start Command: `cd api && uvicorn app:app --host 0.0.0.0 --port $PORT`
+3. 環境変数を設定（上記と同じ）
 
 ## パフォーマンス最適化
 
