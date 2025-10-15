@@ -11,3 +11,5 @@ __pycache__/
 frontend/
 frontend-gitignore
 .vercel-output-gitignore
+nixpacks.toml
+railway.json
