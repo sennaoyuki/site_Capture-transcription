@@ -18,7 +18,6 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
 # transcribe_websiteモジュールをインポート
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "search_man copy"))
 import transcribe_website
 
 app = FastAPI(title="LP Transcriber API", version="1.0.0")
