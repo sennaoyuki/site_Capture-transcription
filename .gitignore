@@ -20,7 +20,6 @@ search_man copy/output/
 *.png
 *.jpg
 *.jpeg
-*.md
 *.txt
 
 # IDEs
