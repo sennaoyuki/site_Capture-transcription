@@ -1,0 +1,49 @@
+version: 1
+description: >
+  transcribe_website.py 実行後に、生成された文字起こしと指定キーワードを Claude に渡して
+  マーケティング分析を行うためのテンプレートです。
+
+defaults:
+  prompt_file: マウスピース矯正/prompts/marketing_analysis_prompt.md
+  transcript_path: マウスピース矯正/output/latest/website_transcription.md
+  model: claude-4.5-sonnet
+
+variables:
+  keyword:
+    description: リスティング広告で想定している検索キーワード
+    example: マウスピース矯正 痛み
+  conversion_goal:
+    description: 想定している最終的なコンバージョン（例：無料相談予約、WEB申込み など）
+    example: 無料カウンセリング予約
+  transcript_path:
+    description: transcribe_website.py が出力した Markdown 文字起こしファイルのパス
+    default: ${defaults.transcript_path}
+
+steps:
+  - name: run_claude_marketing_analysis
+    description: >
+      Claude CLI にマーケティング分析プロンプトと文字起こしデータを渡して解析を実行します。
+      transcript_path が最新のランに対応しているかを事前に確認してください。
+    shell: |
+      KEYWORD="{{ keyword }}"
+      CONVERSION="{{ conversion_goal }}"
+      TRANSCRIPT_PATH="{{ transcript_path }}"
+      PROMPT_FILE="{{ defaults.prompt_file }}"
+      MODEL="{{ defaults.model }}"
+
+      if [ ! -f "${PROMPT_FILE}" ]; then
+        echo "prompt file not found: ${PROMPT_FILE}" >&2
+        exit 1
+      fi
+
+      if [ ! -f "${TRANSCRIPT_PATH}" ]; then
+        echo "transcript file not found: ${TRANSCRIPT_PATH}" >&2
+        exit 1
+      fi
+
+      claude \
+        --model "${MODEL}" \
+        --prompt-file "${PROMPT_FILE}" \
+        --append "検索キーワード: ${KEYWORD}" \
+        --append "理想的なユーザー行動（コンバージョン）: ${CONVERSION}" \
+        --stdin-file "${TRANSCRIPT_PATH}"
