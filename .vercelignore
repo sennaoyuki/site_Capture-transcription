@@ -1,4 +1,4 @@
-backend/
+api/
 search_man copy/
 search_man/
 TD作成くん/
@@ -8,3 +8,6 @@ TD作成くん/
 *.pyc
 __pycache__/
 .git/
+frontend/
+frontend-gitignore
+.vercel-output-gitignore
