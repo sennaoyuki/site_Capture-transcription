@@ -1,5 +1,8 @@
+[providers]
+python = "3.10"
+
 [phases.setup]
-nixPkgs = ["python310", "playwright-driver"]
+nixPkgs = ["...", "playwright-driver"]
 
 [phases.install]
 cmds = [
