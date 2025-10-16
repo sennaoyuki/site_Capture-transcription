@@ -17,18 +17,8 @@ from datetime import datetime
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
-BASE_DIR = Path(__file__).resolve().parent
-ROOT_DIR = BASE_DIR.parent
-if str(ROOT_DIR) not in sys.path:
-    sys.path.append(str(ROOT_DIR))
-
 # transcribe_websiteモジュールをインポート
 import transcribe_website
-
-from TD作成くん.td_builder.config import AppConfig as TDAppConfig
-from TD作成くん.td_builder.pipeline import build_td_report
-from TD作成くん.td_builder.models import InputSpec
-from TD作成くん.td_builder.serp import SerpProviderError
 
 app = FastAPI(title="LP Transcriber API", version="1.0.0")
 
@@ -72,12 +62,6 @@ class TranscribeURLRequest(BaseModel):
     url: HttpUrl
 
 
-class TDRequest(BaseModel):
-    target: str
-    keyword: str
-    site_info: Optional[str] = None
-
-
 class StatusResponse(BaseModel):
     job_id: str
     status: str
@@ -98,8 +82,7 @@ async def root():
             "transcribe_url": "/api/transcribe/url",
             "transcribe_upload": "/api/transcribe/upload",
             "status": "/api/status/{job_id}",
-            "download": "/api/download/{job_id}/{file_type}",
-            "build_td": "/api/td/build"
+            "download": "/api/download/{job_id}/{file_type}"
         }
     }
 
@@ -168,83 +151,6 @@ async def transcribe_upload(file: UploadFile = File(...)):
         "job_id": job_id,
         "status": "processing",
         "message": "処理を開始しました"
-    }
-
-
-@app.post("/api/td/build")
-async def build_td_endpoint(request: TDRequest):
-    """TD生成パイプラインを実行"""
-    loop = asyncio.get_event_loop()
-    spec = InputSpec(target=request.target, keyword=request.keyword, site_info=request.site_info)
-    config = TDAppConfig()
-    try:
-        report = await loop.run_in_executor(executor, _run_td_pipeline, spec, config)
-    except SerpProviderError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
-    except Exception as exc:  # noqa: BLE001
-        raise HTTPException(status_code=500, detail=f"TD生成に失敗しました: {exc}") from exc
-    return _serialize_td_report(report)
-
-
-def _run_td_pipeline(spec: InputSpec, config: TDAppConfig):
-    """同期的にTDレポートを生成するヘルパー"""
-    return build_td_report(spec, config)
-
-
-def _serialize_td_report(report):
-    """TDレポートをJSONシリアライズ可能な辞書へ変換"""
-    return {
-        "keyword": report.keyword,
-        "target": report.target,
-        "intent": {
-            "primary": report.intent.primary_intent,
-            "evidence": report.intent.supporting_evidence,
-        },
-        "ads": [
-            {
-                "position": ad.position,
-                "title": ad.title,
-                "description": ad.description,
-                "link": ad.link,
-                "display_link": ad.display_link,
-                "summary": _serialize_page_summary(ad.site_summary),
-            }
-            for ad in report.ads
-        ],
-        "seo_insights": [
-            {
-                "position": insight.position,
-                "title": insight.title,
-                "summary": insight.summary,
-                "key_topics": insight.key_topics,
-            }
-            for insight in report.seo_insights
-        ],
-        "appeal_axes": [
-            {"name": axis.name, "score": axis.score, "evidence": axis.evidence}
-            for axis in report.appeal_axes
-        ],
-        "proposals": [
-            {
-                "title": proposal.title,
-                "description": proposal.description,
-                "cta": proposal.cta,
-                "rationale": proposal.rationale,
-            }
-            for proposal in report.proposals
-        ],
-    }
-
-
-def _serialize_page_summary(summary):
-    if summary is None:
-        return None
-    return {
-        "url": summary.url,
-        "title": summary.title,
-        "meta_description": summary.meta_description,
-        "headings": summary.headings,
-        "key_points": summary.key_points,
     }
 
 
