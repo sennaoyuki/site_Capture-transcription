@@ -50,9 +50,13 @@ class BrowserService:
     async def capture_url(self, page: Page, url: str, output_root: Path) -> list[Path]:
         await page.goto(url, wait_until="networkidle", timeout=self._config.request_timeout * 1000)
         await asyncio.sleep(1.0)
+
         total_height = await page.evaluate("document.body.scrollHeight")
         viewport = await page.evaluate("({ width: window.innerWidth, height: window.innerHeight })")
         width = int(viewport.get("width", 1280))
+        width = max(width, 320)
+        height = max(int(viewport.get("height", self._config.slice_height)), 320)
+        await page.set_viewport_size({"width": width, "height": height})
         slice_height = self._config.slice_height
         output_root = ensure_dir(output_root)
 
@@ -63,10 +67,16 @@ class BrowserService:
             clip_height = min(slice_height, total_height - y)
             clip_height = max(int(clip_height), 1)
             path = output_root / f"slice_{index:03d}.png"
+            clip_y = min(int(y), max(total_height - clip_height, 0))
             await page.screenshot(
                 path=str(path),
                 full_page=False,
-                clip={"x": 0, "y": int(y), "width": width, "height": clip_height},
+                clip={
+                    "x": 0,
+                    "y": clip_y,
+                    "width": width,
+                    "height": clip_height,
+                },
             )
             image_paths.append(path)
             y += clip_height

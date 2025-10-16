@@ -3,13 +3,17 @@ from typing import Optional
 
 
 @dataclass(frozen=True)
-class SerpApiConfig:
+class SerpConfig:
+    provider: str = "scrapingdog"
     api_key: Optional[str] = None
     engine: str = "google"
     locale: str = "jp"
     gl: str = "jp"
     hl: str = "ja"
     num_organic_results: int = 3
+    domain: str = "google.co.jp"
+    advance_search: bool = True
+    include_ads: bool = True
     timeout: int = 30
 
 
@@ -32,7 +36,7 @@ class GeneratorConfig:
 
 @dataclass(frozen=True)
 class AppConfig:
-    serp: SerpApiConfig = SerpApiConfig()
+    serp: SerpConfig = SerpConfig()
     scraper: ScraperConfig = ScraperConfig()
     analysis: AnalysisConfig = AnalysisConfig()
     generator: GeneratorConfig = GeneratorConfig()

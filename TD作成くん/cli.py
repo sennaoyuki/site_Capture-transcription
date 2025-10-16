@@ -6,7 +6,7 @@ from pathlib import Path
 from .td_builder.config import AppConfig
 from .td_builder.models import InputSpec
 from .td_builder.pipeline import build_td_report, load_spec_from_json
-from .td_builder.serp import SerpApiError
+from .td_builder.serp import SerpProviderError
 
 
 def main() -> None:
@@ -26,7 +26,7 @@ def main() -> None:
 
     try:
         report = build_td_report(spec, config)
-    except SerpApiError as exc:
+    except SerpProviderError as exc:
         logging.error(str(exc))
         raise SystemExit(1) from exc
 

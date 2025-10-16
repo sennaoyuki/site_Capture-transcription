@@ -9,6 +9,11 @@
         <p class="text-lg text-gray-600">
           URLやローカルHTMLから簡単に文字起こし
         </p>
+        <p class="text-sm text-primary mt-3">
+          <NuxtLink to="/td" class="hover:text-primary-hover transition">
+            👉 Google広告TDを自動生成する「TD作成くん Webアプリ」はこちら
+          </NuxtLink>
+        </p>
       </header>
 
       <!-- 入力セクション -->
@@ -112,7 +117,22 @@
             :style="{ width: `${progress}%` }"
           ></div>
         </div>
-        <p class="text-sm text-gray-600">{{ statusMessage }}</p>
+        <p class="text-sm text-gray-600 mb-4">{{ statusMessage }}</p>
+
+        <!-- ログ表示 -->
+        <div v-if="logs.length > 0" class="mt-4">
+          <h3 class="text-sm font-semibold text-gray-700 mb-2">📋 処理ログ</h3>
+          <div class="bg-gray-50 rounded-lg p-3 max-h-48 overflow-y-auto">
+            <div
+              v-for="(log, index) in logs"
+              :key="index"
+              class="text-xs text-gray-600 mb-1 font-mono"
+            >
+              <span class="text-gray-400">{{ formatTime(log.timestamp) }}</span>
+              <span class="ml-2">{{ log.message }}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- 結果表示エリア -->
@@ -278,6 +298,7 @@ const result = ref<any>(null)
 const screenshotUrl = ref('')
 const showImageModal = ref(false)
 const isPreviewOpen = ref(true)
+const logs = ref<Array<{timestamp: string, message: string}>>([])
 
 const canSubmit = computed(() => {
   if (inputMode.value === 'url') {
@@ -307,6 +328,7 @@ const startTranscription = async () => {
   segments.value = []
   result.value = null
   screenshotUrl.value = ''
+  logs.value = []
 
   try {
     let response
@@ -360,6 +382,11 @@ const pollStatus = async () => {
     progress.value = data.progress || 0
     statusMessage.value = data.message || '処理中...'
 
+    // ログを更新
+    if (data.logs && data.logs.length > 0) {
+      logs.value = data.logs
+    }
+
     if (data.status === 'completed') {
       isProcessing.value = false
       result.value = data.result
@@ -409,5 +436,10 @@ const downloadFile = (fileType: string) => {
   if (!jobId.value) return
   const url = `${apiBase}/api/download/${jobId.value}/${fileType}`
   window.open(url, '_blank')
+}
+
+const formatTime = (timestamp: string) => {
+  const date = new Date(timestamp)
+  return date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
 }
 </script>

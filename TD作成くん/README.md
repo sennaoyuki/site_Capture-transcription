@@ -1,17 +1,18 @@
 # TD作成くん アプリ概要
 
 ## 概要
-ターゲット情報と検索キーワードを入力に、Google検索結果（広告・SEO）を収集し、検索意図や競合訴求を整理したうえでGoogle広告用のTD案を自動生成するCLIアプリケーションです。SERP取得には [SerpAPI](https://serpapi.com/) の Google Search API を利用します。
+ターゲット情報と検索キーワードを入力に、Google検索結果（広告・SEO）を収集し、検索意図や競合訴求を整理したうえでGoogle広告用のTD案を自動生成するCLIアプリケーションです。デフォルトでは [ScrapingDog](https://www.scrapingdog.com/google-search-api) の Google Search API を利用しますが、設定を切り替えることで SerpAPI も利用可能です。
 
 ## セットアップ
 1. 依存パッケージのインストール
    ```bash
    pip install -r requirements.txt
    ```
-2. SerpAPIのAPIキーを環境変数として設定
+2. ScrapingDogのAPIキーを環境変数として設定
    ```bash
-   export SERPAPI_KEY=あなたのAPIキー
+   export SCRAPINGDOG_API_KEY=あなたのAPIキー
    ```
+   SerpAPIを利用したい場合は `td_builder/config.py` の `SerpConfig` で `provider` を `"serpapi"` に変更し、`SERPAPI_KEY` を設定してください。
 
 ## 使い方
 ### 直接引数で実行
@@ -51,5 +52,5 @@ python -m TD作成くん.cli --input input.json --output report.json
 
 ## 注意事項
 - 実際の配信前には広告ポリシー準拠や表現の正確性を運用担当者が確認してください。
-- SerpAPI利用規約とGoogleの利用規約に従って運用してください。
+- 利用するAPI（ScrapingDog / SerpAPIなど）の規約とGoogleの利用規約に従って運用してください。
 - スクレイピング対象サイトのrobots.txtやアクセス制限に配慮し、必要に応じてレート制御を追加してください。

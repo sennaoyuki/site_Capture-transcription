@@ -10,6 +10,7 @@ URLまたはローカルHTMLファイルからスクリーンショットを撮�
 - 個別スライスごとの文字起こし結果表示
 - クリップボードコピー機能
 - MD/TXT形式でのダウンロード
+- 検索広告・SEO分析に基づくGoogle広告TD案自動生成（TD作成くん）
 
 ## 技術スタック
 
@@ -22,6 +23,7 @@ URLまたはローカルHTMLファイルからスクリーンショットを撮�
 - FastAPI
 - Playwright (ブラウザ自動化)
 - Google Gemini API (OCR)
+- ScrapingDog / SerpAPI (検索結果取得: TD作成くん)
 
 ## ローカル開発
 
@@ -59,6 +61,16 @@ npm run dev
 ```
 
 5. ブラウザで http://localhost:3000 にアクセス
+
+### TD作成くん Webアプリの利用
+
+1. バックエンドの環境変数を設定（ScrapingDogの場合）
+   ```bash
+   export SCRAPINGDOG_API_KEY=your_scrapingdog_api_key
+   ```
+   SerpAPIを利用する場合は `TD作成くん/td_builder/config.py` の `SerpConfig.provider` を `"serpapi"` に変更し、`SERPAPI_KEY` を設定してください。
+2. 上記手順でバックエンドを起動した状態でブラウザから `http://localhost:3000/td` にアクセス
+3. 「ターゲット」「検索キーワード」「サイト特徴（任意）」を入力してTD案を生成
 
 ## Vercelへのデプロイ
 

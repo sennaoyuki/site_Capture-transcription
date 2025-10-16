@@ -79,6 +79,7 @@ npm run dev
 3. URL入力 または HTMLファイルをアップロード/ドラッグ&ドロップ
 4. 「🚀 文字起こし実行」ボタンをクリック
 5. 処理完了後、結果を確認・ダウンロード
+6. Google広告TDの自動生成は `http://localhost:3000/td` から利用できます（ScrapingDog API Key が必要）
 
 ## API エンドポイント
 

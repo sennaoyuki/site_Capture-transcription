@@ -7,14 +7,14 @@ from .config import AppConfig
 from .generator import TDGenerator
 from .models import InputSpec, OrganicResult, Report, SerpAd
 from .scraper import PageScraper
-from .serp import SerpApiClient, SerpApiError, parse_ads, parse_organic_results
+from .serp import SerpClient, SerpProviderError, parse_ads, parse_organic_results
 
 LOGGER = logging.getLogger(__name__)
 
 
 def build_td_report(spec: InputSpec, config: Optional[AppConfig] = None) -> Report:
     config = config or AppConfig()
-    serp_client = SerpApiClient(config.serp)
+    serp_client = SerpClient(config.serp)
     scraper = PageScraper(config.scraper)
     analyzer = Analyzer(config.analysis)
     generator = TDGenerator(config.generator)
