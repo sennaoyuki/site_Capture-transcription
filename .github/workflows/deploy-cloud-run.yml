@@ -1,0 +1,64 @@
+name: Deploy API to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: lispageoptimization
+  SERVICE: td-backend
+  REGION: asia-northeast1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          project_id: ${{ env.PROJECT_ID }}
+          export_default_credentials: true
+
+      - name: Enable docker auth
+        run: gcloud auth configure-docker --quiet
+
+      - name: Deploy to Cloud Run
+        env:
+          SCRAPINGDOG_API_KEY: ${{ secrets.SCRAPINGDOG_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+        run: |
+          set -euo pipefail
+          IMAGE="gcr.io/${PROJECT_ID}/${SERVICE}"
+
+          echo "Building container image ${IMAGE}..."
+          gcloud builds submit --tag "${IMAGE}" api
+
+          ENV_VARS="SCRAPINGDOG_API_KEY=${SCRAPINGDOG_API_KEY}"
+          if [ -n "${GOOGLE_API_KEY:-}" ]; then
+            ENV_VARS="${ENV_VARS},GOOGLE_API_KEY=${GOOGLE_API_KEY}"
+          fi
+          if [ -n "${SERPAPI_KEY:-}" ]; then
+            ENV_VARS="${ENV_VARS},SERPAPI_KEY=${SERPAPI_KEY}"
+          fi
+
+          echo "Deploying to Cloud Run service ${SERVICE}..."
+          gcloud run deploy "${SERVICE}" \
+            --image "${IMAGE}" \
+            --region "${REGION}" \
+            --platform managed \
+            --allow-unauthenticated \
+            --memory 2Gi \
+            --timeout 300 \
+            --max-instances 3 \
+            --set-env-vars "${ENV_VARS}"

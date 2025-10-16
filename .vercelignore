@@ -1,15 +1,8 @@
 api/
-search_man copy/
-search_man/
 TD作成くん/
-サイトテキスト起こせるくん/
-マウスピース矯正/
-生成AI/
-*.pyc
+search_man/
+search_man copy/
 __pycache__/
-.git/
-frontend/
-frontend-gitignore
-.vercel-output-gitignore
-nixpacks.toml
-railway.json
+*.pyc
+node_modules/
+*.log

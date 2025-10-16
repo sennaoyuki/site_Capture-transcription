@@ -72,6 +72,16 @@ npm run dev
 2. 上記手順でバックエンドを起動した状態でブラウザから `http://localhost:3000/td` にアクセス
 3. 「ターゲット」「検索キーワード」「サイト特徴（任意）」を入力してTD案を生成
 
+### GitHub Actions × Cloud Run 自動デプロイ
+
+- `main` ブランチへ push すると `.github/workflows/deploy-cloud-run.yml` が走り、`api/` 以下を Cloud Run にデプロイします。
+- 必要なリポジトリ Secret
+  - `GCP_SERVICE_ACCOUNT_KEY`: Cloud Run/Build/Artifact Registry 権限付きサービスアカウントのJSON
+  - `SCRAPINGDOG_API_KEY`: ScrapingDog のAPIキー（必須）
+  - `GOOGLE_API_KEY` / `SERPAPI_KEY`: 利用する場合のみ任意設定
+- デプロイ先: プロジェクト `lispageoptimization`、リージョン `asia-northeast1`、サービス名 `td-backend`
+- Cloud Run 側のURLを取得し、Vercel側の `API_BASE_URL` に設定すると本番環境で `/td` が利用できます。
+
 ## Vercelへのデプロイ
 
 ### 方法1: Vercel CLI（推奨）

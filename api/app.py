@@ -16,6 +16,11 @@ import shutil
 from datetime import datetime
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+import logging
+
+# ロギング設定
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # transcribe_websiteモジュールをインポート
 import transcribe_website
@@ -200,17 +205,22 @@ async def download_file(job_id: str, file_type: str):
 def process_url_transcription(job_id: str, url: str):
     """URLの文字起こし処理（バックグラウンド）- 同期関数"""
     try:
+        logger.info(f"[{job_id}] Starting URL transcription: {url}")
         add_log(job_id, f"処理開始: URL={url}")
         processing_status[job_id]["message"] = "ページを読み込み中..."
         processing_status[job_id]["progress"] = 10
 
         add_log(job_id, "Playwrightでブラウザを起動中...")
+        logger.info(f"[{job_id}] Calling transcribe_website.transcribe_website()")
+
         result = transcribe_website.transcribe_website(
             url=url,
             slice_height=transcribe_website.SLICE_HEIGHT_DEFAULT,
             overlap=transcribe_website.SLICE_OVERLAP_DEFAULT,
             keyword_slug=None
         )
+
+        logger.info(f"[{job_id}] transcribe_website completed, got {len(result.get('segments', []))} segments")
 
         add_log(job_id, f"スクリーンショット取得完了: {len(result['segments'])} セグメント")
         processing_status[job_id]["message"] = "スクリーンショット取得完了"
@@ -260,6 +270,7 @@ def process_url_transcription(job_id: str, url: str):
         }
 
     except Exception as e:
+        logger.error(f"[{job_id}] Error in transcription: {str(e)}", exc_info=True)
         add_log(job_id, f"エラー発生: {str(e)}")
         processing_status[job_id]["status"] = "error"
         processing_status[job_id]["message"] = "エラーが発生しました"
@@ -333,6 +344,7 @@ def process_local_transcription(job_id: str, html_path: Path):
             html_path.unlink()
 
     except Exception as e:
+        logger.error(f"[{job_id}] Error in transcription: {str(e)}", exc_info=True)
         add_log(job_id, f"エラー発生: {str(e)}")
         processing_status[job_id]["status"] = "error"
         processing_status[job_id]["message"] = "エラーが発生しました"
